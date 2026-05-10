@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>JT Smalley — Lighting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap">
+<script>
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "palette": "cocoa",
+  "display": "dm",
+  "grid": "editorial",
+  "illustrationDensity": "rich",
+  "heroLayout": "asymmetric"
+}/*EDITMODE-END*/;
+</script>
+<style>
+  :root {
+    --bg: #181614;
+    --bg-2: #1f1c19;
+    --bg-3: #252220;
+    --ink: #e0d6c8;
+    --ink-dim: #9a8970;
+    --ink-deep: #4a3f35;
+    --rule: rgba(224, 214, 200, 0.12);
+    --rule-strong: rgba(224, 214, 200, 0.25);
+    --accent: #b89968;
+    --display: 'Cormorant Garamond', 'Times New Roman', serif;
+    --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  /* Palette variants */
+  [data-palette="amber"] {
+    --bg: #1a1410; --bg-2: #221a14; --bg-3: #2a2018;
+    --ink: #f0e6d2; --ink-dim: #a88860; --ink-deep: #5a3820;
+    --accent: #c4733a;
+  }
+  [data-palette="obsidian"] {
+    --bg: #0e0c0a; --bg-2: #16130f; --bg-3: #1e1a14;
+    --ink: #f5ecd9; --ink-dim: #a89878; --ink-deep: #3a2f22;
+    --accent: #d4a574;
+  }
+  [data-palette="cocoa"] {
+    --bg: #161310; --bg-2: #1d1915; --bg-3: #24201a;
+    --ink: #e8dcc4; --ink-dim: #b8956a; --ink-deep: #3a3128;
+    --accent: #b8956a;
+  }
+
+  /* Display font variants */
+  [data-display="dm"] { --display: 'DM Serif Display', 'Times New Roman', serif; }
+  [data-display="playfair"] { --display: 'Playfair Display', 'Times New Roman', serif; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    z-index: 1000;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  }
+
+  /* Typography */
+  .display {
+    font-family: var(--display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.02;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .italic { font-style: italic; }
+
+  /* Layout */
+  .container {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+  @media (max-width: 720px) { .container { padding: 0 24px; } }
+
+  section { position: relative; }
+  .rule { height: 1px; background: var(--rule); width: 100%; }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 28px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.4s ease, backdrop-filter 0.4s ease, border-color 0.4s ease;
+    border-bottom: 1px solid transparent;
+  }
+  .nav.scrolled {
+    background: rgba(24, 22, 20, 0.85);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom-color: var(--rule);
+    padding: 20px 48px;
+  }
+  @media (max-width: 720px) { .nav, .nav.scrolled { padding: 20px 24px; } }
+
+  .nav-mark {
+    font-family: var(--display);
+    font-size: 20px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nav-mark em { color: var(--ink-dim); font-style: normal; }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .nav-links a {
+    color: var(--ink-dim);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  @media (max-width: 720px) { .nav-links { display: none; } }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 140px 0 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.55;
+    will-change: transform;
+  }
+  .hero-bg svg { width: 100%; height: 100%; }
+
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+  }
+  .hero-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 80px;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .hero-meta > div > span + span { margin-left: 22px; padding-left: 22px; border-left: 1px solid var(--rule); }
+
+  .hero-title {
+    font-size: clamp(60px, 11vw, 180px);
+    margin-bottom: 48px;
+    letter-spacing: -0.02em;
+    font-weight: 300;
+  }
+  .hero-title .amp {
+    font-style: italic;
+    color: var(--ink-dim);
+    font-weight: 300;
+  }
+  .hero-title .break { display: block; }
+
+  .hero-tagline {
+    max-width: 640px;
+    font-family: var(--display);
+    font-size: clamp(22px, 2.6vw, 32px);
+    font-weight: 300;
+    line-height: 1.35;
+    color: var(--ink);
+    margin-left: auto;
+    text-align: right;
+  }
+  .hero-tagline em { color: var(--ink-dim); }
+
+  .hero-foot {
+    position: absolute;
+    bottom: 40px;
+    left: 48px;
+    right: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    z-index: 2;
+  }
+  @media (max-width: 720px) {
+    .hero-foot { left: 24px; right: 24px; bottom: 28px; }
+    .hero-tagline { text-align: left; margin-left: 0; }
+  }
+  .hero-scroll {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .hero-scroll::after {
+    content: '';
+    width: 48px;
+    height: 1px;
+    background: var(--ink-dim);
+    animation: scrollLine 2.4s ease-in-out infinite;
+    transform-origin: left;
+  }
+  @keyframes scrollLine {
+    0%, 100% { transform: scaleX(0.3); opacity: 0.4; }
+    50% { transform: scaleX(1); opacity: 1; }
+  }
+
+  /* Section heading */
+  .section {
+    min-height: 100vh;
+    padding: 160px 0 140px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-top: 1px solid var(--rule-strong);
+  }
+  @media (max-width: 720px) { .section { padding: 120px 0 96px; min-height: auto; } }
+
+  /* Section divider — label between sections */
+  .sec-divider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 28px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    pointer-events: none;
+  }
+  .sec-divider .idx { color: var(--accent); }
+  @media (max-width: 720px) { .sec-divider { padding: 20px 24px; } }
+
+  .sec-head {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 80px;
+    margin-bottom: 80px;
+    align-items: baseline;
+  }
+  @media (max-width: 860px) {
+    .sec-head { grid-template-columns: 1fr; gap: 24px; margin-bottom: 56px; }
+  }
+  .sec-head .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--ink-dim);
+    vertical-align: middle;
+    margin-right: 16px;
+  }
+  .sec-title {
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 300;
+  }
+
+  /* About */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 80px;
+  }
+  @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  .about-body p {
+    font-family: var(--display);
+    font-size: clamp(22px, 2.2vw, 28px);
+    line-height: 1.45;
+    font-weight: 300;
+    color: var(--ink);
+    margin-bottom: 28px;
+    max-width: 38ch;
+  }
+  .about-body p + p { color: var(--ink-dim); font-size: clamp(18px, 1.8vw, 22px); }
+
+  .about-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .meta-item {
+    border-top: 1px solid var(--rule);
+    padding-top: 18px;
+  }
+  .meta-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+  .meta-value {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1.4;
+  }
+  .meta-value .sub {
+    display: block;
+    font-family: var(--body);
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+  }
+
+  /* About distinct background treatment */
+  #about { background: var(--bg); }
+
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  @media (max-width: 860px) { .concept-grid { grid-template-columns: 1fr; } }
+
+  .concept-card {
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 56px 48px;
+    position: relative;
+    transition: background 0.6s ease;
+    cursor: pointer;
+  }
+  .concept-card:hover { background: var(--bg-3); }
+  .concept-card:hover .concept-illus { transform: scale(1.04); }
+  .concept-card:hover .concept-illus .rot { transform: rotate(8deg); }
+
+  .concept-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-dim);
+    letter-spacing: 0.22em;
+    position: absolute;
+    top: 32px;
+    right: 48px;
+  }
+
+  .concept-illus {
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 48px;
+    transition: transform 0.8s cubic-bezier(.2,.8,.2,1);
+  }
+  .concept-illus svg { width: 68%; height: 68%; overflow: visible; }
+  .concept-illus .stroke { stroke: var(--accent); stroke-width: 0.5; fill: none; }
+  .concept-illus .stroke-dim { stroke: var(--ink-deep); stroke-width: 0.4; fill: none; }
+  .concept-illus .dot { fill: var(--accent); }
+  .concept-illus .rot { transform-origin: center; transition: transform 1.2s cubic-bezier(.2,.8,.2,1); }
+
+  .concept-title {
+    font-family: var(--display);
+    font-size: 38px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .concept-title em { color: var(--ink-dim); font-weight: 300; }
+  .concept-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 24px;
+  }
+  .concept-desc {
+    max-width: 44ch;
+    font-size: 15px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .concept-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .concept-foot .cta {
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .concept-foot .cta::after {
+    content: '→';
+    transition: transform 0.4s;
+  }
+  .concept-card:hover .concept-foot .cta::after { transform: translateX(4px); }
+
+  /* Process */
+  .process-list { counter-reset: step; }
+  .process-item {
+    display: grid;
+    grid-template-columns: 120px 1fr 2fr;
+    gap: 48px;
+    padding: 48px 0;
+    border-top: 1px solid var(--rule);
+    align-items: baseline;
+    transition: padding 0.4s ease;
+  }
+  .process-item:last-child { border-bottom: 1px solid var(--rule); }
+  .process-item:hover { padding-left: 16px; }
+  @media (max-width: 860px) {
+    .process-item { grid-template-columns: 1fr; gap: 16px; padding: 32px 0; }
+  }
+
+  .process-num {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--ink-dim);
+  }
+  .process-title {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.15;
+  }
+  .process-body {
+    color: var(--ink-dim);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 52ch;
+  }
+
+  /* Process */
+  #process { background: var(--bg); }
+
+  /* Contact */
+  #contact { background: var(--bg); }
+  #contact::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(ellipse at 70% 40%, var(--accent) 0, transparent 50%);
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 96px;
+  }
+  @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  .contact-lede {
+    font-family: var(--display);
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 48px;
+    letter-spacing: -0.01em;
+  }
+  .contact-lede em { color: var(--ink-dim); font-weight: 300; }
+
+  .contact-direct {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+  }
+  .contact-direct a {
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 300;
+    transition: color 0.3s;
+    display: inline-block;
+  }
+  .contact-direct a:hover { color: var(--accent); }
+  .contact-direct .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+  }
+
+  /* Form */
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .field input, .field textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--rule-strong);
+    padding: 12px 0;
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.3s;
+    resize: none;
+  }
+  .field input:focus, .field textarea:focus { border-bottom-color: var(--accent); }
+  .field input::placeholder, .field textarea::placeholder {
+    color: var(--ink-deep);
+    font-style: italic;
+  }
+  .field textarea { min-height: 80px; font-size: 18px; line-height: 1.5; }
+  .field .err {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    min-height: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .field.invalid .err { opacity: 1; }
+  .field.invalid input, .field.invalid textarea { border-bottom-color: var(--accent); }
+
+  .submit {
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink);
+    padding: 20px 32px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .submit:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .submit::after { content: '→'; }
+  .submit.sent { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .submit.sent::after { content: '✓'; }
+
+  /* Footer */
+  footer {
+    padding: 64px 0 48px;
+    border-top: 1px solid var(--rule);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 64px;
+  }
+  @media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; } }
+
+  .footer-mark {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 300;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .footer-mark em { color: var(--ink-dim); font-style: italic; }
+  .footer-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .footer-col h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s;
+  }
+  .footer-col a:hover { color: var(--accent); }
+
+  .footer-base {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  @media (max-width: 720px) { .footer-base { flex-direction: column; gap: 16px; align-items: flex-start; } }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 1.4s cubic-bezier(.2,.8,.2,1), transform 1.4s cubic-bezier(.2,.8,.2,1);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  .reveal.d1 { transition-delay: 0.08s; }
+  .reveal.d2 { transition-delay: 0.16s; }
+  .reveal.d3 { transition-delay: 0.24s; }
+  .reveal.d4 { transition-delay: 0.32s; }
+
+  /* Tweaks */
+  #tweaks-panel {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 200;
+    background: rgba(24, 22, 20, 0.92);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--rule-strong);
+    padding: 20px 22px;
+    width: 260px;
+    font-family: var(--body);
+    display: none;
+    color: var(--ink);
+  }
+  #tweaks-panel.open { display: block; }
+  #tweaks-panel h3 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 16px;
+    font-weight: 400;
+  }
+  #tweaks-panel .row { margin-bottom: 14px; }
+  #tweaks-panel .row label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+  }
+  #tweaks-panel .opts { display: flex; gap: 4px; flex-wrap: wrap; }
+  #tweaks-panel .opts button {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink-dim);
+    padding: 6px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  #tweaks-panel .opts button.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Hero layout variants */
+  [data-hero-layout="asymmetric"] .hero-title { text-align: left; }
+  [data-hero-layout="asymmetric"] .hero-tagline { margin-left: 0; text-align: left; max-width: 520px; margin-top: 60px; }
+  [data-hero-layout="centered"] .hero-title { text-align: center; }
+  [data-hero-layout="centered"] .hero-tagline { margin: 40px auto 0; text-align: center; }
+  [data-hero-layout="split"] .hero-inner { display: grid; grid-template-columns: 3fr 2fr; gap: 80px; align-items: center; }
+  [data-hero-layout="split"] .hero-title { font-size: clamp(48px, 8vw, 120px); }
+  [data-hero-layout="split"] .hero-meta { grid-column: 1 / -1; }
+  @media (max-width: 860px) {
+    [data-hero-layout="split"] .hero-inner { grid-template-columns: 1fr; }
+  }
+
+  /* Concept grid variants */
+  [data-grid="uniform"] .concept-card { padding: 56px 48px; }
+  [data-grid="editorial"] .concept-card:nth-child(1) { padding-top: 96px; }
+  [data-grid="editorial"] .concept-card:nth-child(4) { padding-bottom: 96px; }
+  [data-grid="dense"] .concept-grid { grid-template-columns: repeat(2, 1fr); }
+  [data-grid="dense"] .concept-card { padding: 40px 32px; }
+  [data-grid="dense"] .concept-illus { margin-bottom: 32px; }
+
+  /* Density */
+  [data-density="minimal"] .concept-illus .detail { display: none; }
+  [data-density="rich"] .concept-illus .extra { opacity: 1; }
+  [data-density="balanced"] .concept-illus .extra { opacity: 0.5; }
+</style>
+</head>
+<body data-palette="slate" data-display="cormorant" data-grid="editorial" data-density="balanced" data-hero-layout="asymmetric">
+
+<nav class="nav" id="nav">
+  <a class="nav-mark" href="#top">JT<em>.</em>Smalley</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#process">Licensing</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top" data-screen-label="01 Hero">
+  <div class="hero-bg" id="heroBg">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.18"/>
+          <stop offset="60%" stop-color="var(--accent)" stop-opacity="0.04"/>
+          <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="1200" cy="380" r="420" fill="url(#glow)"/>
+      <g stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.18" style="color: var(--ink-dim)">
+        <circle cx="1200" cy="380" r="300"/>
+        <circle cx="1200" cy="380" r="220"/>
+        <circle cx="1200" cy="380" r="140"/>
+        <circle cx="1200" cy="380" r="60"/>
+        <line x1="900" y1="380" x2="1500" y2="380"/>
+        <line x1="1200" y1="80" x2="1200" y2="680"/>
+        <line x1="988" y1="168" x2="1412" y2="592"/>
+        <line x1="1412" y1="168" x2="988" y2="592"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="container hero-inner">
+    <div class="hero-meta eyebrow reveal">
+      <div><span>Independent</span><span>Lighting</span><span>Est. 2020</span></div>
+      <div><span></span></div>
+    </div>
+
+    <h1 class="display hero-title reveal d1">
+      <span class="break">Lighting</span>
+      <span class="break"><span class="amp">as</span> Sculpture.</span>
+    </h1>
+
+    <p class="hero-tagline reveal d2">
+      Original fixture concepts licensed to manufacturers <em>who want to lead.</em>
+    </p>
+  </div>
+
+  <div class="hero-foot">
+    <div class="hero-scroll">Scroll</div>
+    <div class="eyebrow">
+      <span>Orlando, FL</span>
+    </div>
+  </div>
+</header>
+
+<!-- ABOUT -->
+<section class="section" id="about" data-screen-label="02 About">
+  <div class="sec-divider"><span><span class="idx">01</span> — About</span><span>The practice</span></div>
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow reveal">Section 01 — About</div>
+      <h2 class="display sec-title reveal d1"><span class="italic">A practice</span> built on restraint and refinement.</h2>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-meta">
+        <div class="meta-item reveal">
+          <div class="meta-label">Experience</div>
+          <div class="meta-value">5+ Years<span class="sub">In residential & decorative lighting</span></div>
+        </div>
+        <div class="meta-item reveal d1">
+          <div class="meta-label">Past Houses</div>
+          <div class="meta-value">Urban Electric<span class="sub">Charleston, SC</span></div>
+          <div class="meta-value" style="margin-top:8px">Progress Lighting<span class="sub">Greenville, SC</span></div>
+          <div class="meta-value" style="margin-top:8px">Kichler<span class="sub">Cleveland, OH</span></div>
+        </div>
+        <div class="meta-item reveal d2">
+          <div class="meta-label">Model</div>
+          <div class="meta-value italic">Develop. Retain. Royalty.<span class="sub">IP-led licensing</span></div>
+        </div>
+      </div>
+
+      <div class="about-body">
+        <p class="reveal">
+          I develop original lighting concepts — form, proportion, materiality —<br>and license them to manufacturers<br>positioned to bring them to market.
+        </p>
+        <p class="reveal d1">
+          The work is rooted in five years inside the industry, designing for houses whose names carry real weight. I retain the IP. They carry it forward. Royalties follow the fixture.
+        </p>
+        <p class="reveal d2" style="white-space: nowrap; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-dim); line-height: 1.9; text-transform: uppercase; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--rule); font-style: normal;">
+          — BFA, Industrial Design · SCAD<br>
+          — BFA, Fine Art · University of Florida<br>
+          — Both summa cum laude
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="section" id="process" data-screen-label="04 Licensing">
+  <div class="sec-divider"><span><span class="idx">03</span> — Licensing</span><span>Studio to floor</span></div>
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow reveal">Section 03 — Licensing</div>
+      <h2 class="display sec-title reveal d1">How the work <span class="italic">moves from studio to floor.</span></h2>
+    </div>
+
+    <div class="process-list">
+      <div class="process-item reveal">
+        <div class="process-num">i.</div>
+        <h3 class="display process-title">Concept</h3>
+        <p class="process-body">A fixture begins as a drawn and modeled concept — form, proportion, materiality, intended light. I develop each piece independently and retain the IP throughout. You see resolved work, not roughs.</p>
+      </div>
+      <div class="process-item reveal d1">
+        <div class="process-num">ii.</div>
+        <h3 class="display process-title">Review</h3>
+        <p class="process-body">I research your catalog before I reach out. What I bring you is already sized for your collection, your price tier, your manufacturing reality. The conversation is about whether you want to move forward, not whether it fits.</p>
+      </div>
+      <div class="process-item reveal d2">
+        <div class="process-num">iii.</div>
+        <h3 class="display process-title">Agreement</h3>
+        <p class="process-body">A licensing agreement defines territory, exclusivity, term, and royalty rate. The IP stays with me; the right to manufacture, market, and sell belongs to you for the duration of the agreement.</p>
+      </div>
+      <div class="process-item reveal d3">
+        <div class="process-num">iv.</div>
+        <h3 class="display process-title">Production <span class="italic">& Royalties</span></h3>
+        <p class="process-body">I consult through prototyping and pre-production as needed. Royalties follow net wholesale sales, reported and paid on a quarterly schedule. The relationship continues as long as the fixture sells.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact" data-screen-label="05 Contact">
+  <div class="sec-divider"><span><span class="idx">04</span> — Contact</span><span>Inquiries</span></div>
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow reveal">Section 04 — Contact</div>
+      <h2 class="display sec-title reveal d1">Inquiries, <span class="italic">conversations, quiet questions.</span></h2>
+    </div>
+
+    <div class="contact-grid">
+      <div>
+        <p class="contact-lede reveal">
+          Currently reviewing licensing partnerships <em>for 2026–2027 releases.</em>
+        </p>
+        <div class="contact-direct reveal d1">
+          <div>
+            <div class="label">Direct</div>
+            <a href="mailto:studio@jtsmalley.design">studio@jtsmalley.design</a>
+          </div>
+          <div>
+            <div class="label">Contact</div>
+            <a href="mailto:contact@jtsmalley.design">contact@jtsmalley.design</a>
+          </div>
+        </div>
+      </div>
+
+      <form class="form reveal d2" id="inquiry" novalidate>
+        <div class="field" data-required>
+          <label for="f-name">Name</label>
+          <input id="f-name" name="name" type="text" placeholder="Your name"/>
+          <div class="err">Required field</div>
+        </div>
+        <div class="field" data-required>
+          <label for="f-co">Company / Manufacturer</label>
+          <input id="f-co" name="company" type="text" placeholder="House or studio"/>
+          <div class="err">Required field</div>
+        </div>
+        <div class="field" data-required data-email>
+          <label for="f-email">Email</label>
+          <input id="f-email" name="email" type="email" placeholder="you@house.com"/>
+          <div class="err">Valid email required</div>
+        </div>
+        <div class="field" data-required>
+          <label for="f-msg">Message</label>
+          <textarea id="f-msg" name="message" placeholder="A few lines about what you're looking for"></textarea>
+          <div class="err">Please include a message</div>
+        </div>
+        <button type="submit" class="submit" id="submit">Send Inquiry</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-mark">JT Smalley<em>.</em></div>
+        <div class="footer-sub">Lighting concepts · licensing</div>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#concepts"></a></li>
+          <li><a href="#process">Licensing</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="#">LinkedIn</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:studio@jtsmalley.design">studio@jtsmalley.design</a></li>
+          <li><a href="#">Orlando, FL</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-base">
+      <div>© 2026 JT Smalley. All concepts protected.</div>
+      <div>Site <em>Nº</em> 01 — Spring 2026</div>
+    </div>
+  </div>
+</footer>
+
+<!-- TWEAKS PANEL -->
+<div id="tweaks-panel">
+  <h3>Tweaks</h3>
+  <div class="row">
+    <label>Palette</label>
+    <div class="opts" data-tweak="palette">
+      <button data-value="slate">Slate</button>
+      <button data-value="cocoa">Cocoa</button>
+      <button data-value="amber">Amber</button>
+      <button data-value="obsidian">Obsidian</button>
+    </div>
+  </div>
+  <div class="row">
+    <label>Display Type</label>
+    <div class="opts" data-tweak="display">
+      <button data-value="cormorant">Cormorant</button>
+      <button data-value="playfair">Playfair</button>
+      <button data-value="dm">DM Serif</button>
+    </div>
+  </div>
+  <div class="row">
+    <label>Hero Layout</label>
+    <div class="opts" data-tweak="heroLayout">
+      <button data-value="asymmetric">Asymmetric</button>
+      <button data-value="centered">Centered</button>
+      <button data-value="split">Split</button>
+    </div>
+  </div>
+  <div class="row">
+    <label>Concept Grid</label>
+    <div class="opts" data-tweak="grid">
+      <button data-value="editorial">Editorial</button>
+      <button data-value="uniform">Uniform</button>
+      <button data-value="dense">Dense</button>
+    </div>
+  </div>
+  <div class="row">
+    <label>Illustration Density</label>
+    <div class="opts" data-tweak="illustrationDensity">
+      <button data-value="minimal">Minimal</button>
+      <button data-value="balanced">Balanced</button>
+      <button data-value="rich">Rich</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Load optional fonts only when a variant selects them
+(function loadOptionalFonts(){
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap';
+  document.head.appendChild(link);
+})();
+
+// Nav scroll state
+const nav = document.getElementById('nav');
+let lastScroll = 0;
+const onScroll = () => {
+  const y = window.scrollY;
+  nav.classList.toggle('scrolled', y > 40);
+  // Parallax on hero bg
+  const bg = document.getElementById('heroBg');
+  if (bg && y < window.innerHeight) {
+    bg.style.transform = `translate3d(0, ${y * 0.25}px, 0) scale(${1 + y * 0.0002})`;
+  }
+  lastScroll = y;
+};
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+// Scroll reveal
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// Form validation
+const form = document.getElementById('inquiry');
+const submitBtn = document.getElementById('submit');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  let ok = true;
+  form.querySelectorAll('.field').forEach(f => {
+    const input = f.querySelector('input, textarea');
+    const val = input.value.trim();
+    let invalid = false;
+    if (f.hasAttribute('data-required') && !val) invalid = true;
+    if (f.hasAttribute('data-email') && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) invalid = true;
+    f.classList.toggle('invalid', invalid);
+    if (invalid) ok = false;
+  });
+  if (ok) {
+    submitBtn.classList.add('sent');
+    submitBtn.textContent = 'Sent';
+    setTimeout(() => {
+      form.reset();
+      submitBtn.classList.remove('sent');
+      submitBtn.textContent = 'Send Inquiry';
+    }, 2800);
+  }
+});
+form.querySelectorAll('input, textarea').forEach(input => {
+  input.addEventListener('input', () => input.closest('.field').classList.remove('invalid'));
+});
+
+// Tweaks system
+const TWEAK_ATTRS = {
+  palette: 'data-palette',
+  display: 'data-display',
+  grid: 'data-grid',
+  illustrationDensity: 'data-density',
+  heroLayout: 'data-hero-layout'
+};
+
+function applyTweaks(t) {
+  Object.entries(t).forEach(([k, v]) => {
+    const attr = TWEAK_ATTRS[k];
+    if (attr) document.body.setAttribute(attr, v);
+  });
+  // Update active state in panel
+  document.querySelectorAll('#tweaks-panel .opts').forEach(group => {
+    const key = group.dataset.tweak;
+    group.querySelectorAll('button').forEach(b => {
+      b.classList.toggle('active', b.dataset.value === t[key]);
+    });
+  });
+}
+applyTweaks(TWEAKS);
+
+document.querySelectorAll('#tweaks-panel .opts button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.parentElement.dataset.tweak;
+    const val = btn.dataset.value;
+    TWEAKS[key] = val;
+    applyTweaks(TWEAKS);
+    window.parent.postMessage({type: '__edit_mode_set_keys', edits: {[key]: val}}, '*');
+  });
+});
+
+// Edit mode protocol
+window.addEventListener('message', (e) => {
+  if (!e.data || typeof e.data !== 'object') return;
+  if (e.data.type === '__activate_edit_mode') {
+    document.getElementById('tweaks-panel').classList.add('open');
+  } else if (e.data.type === '__deactivate_edit_mode') {
+    document.getElementById('tweaks-panel').classList.remove('open');
+  }
+});
+window.parent.postMessage({type: '__edit_mode_available'}, '*');
+</script>
+</body>
+</html>
